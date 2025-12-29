@@ -1,9 +1,63 @@
-from flask import flask
+from flask import Flask, request, render_template
+import urllib
+import json
 
-app = flask(__name__)
-@app.route(/)
-def home () :
-    return 'Hallo word'
+app = Flask(__name__)
+@app.route('/')
+def home() :
+    return render_template('form.html')
+
+@app.route('/aml', methods=['GET','POST'])
+def aml(): 
+    data ={
+        "Inputs": {
+          "input1": [
+            {
+              "Pregnancies": 0,
+              "Glucose": 137,
+              "BloodPressure": 40,
+              "SkinThickness": 35,
+              "Insulin": 168,
+              "BMI": 43.1,
+              "DiabetesPedigreeFunction": 2.288,
+              "Age": 33,
+              "Outcome": 1
+            }
+          ]
+        },
+        "GlobalParameters": {
+
+        }
+      }
+    body=str.encode(json.dumps(data))
+    url='http://7ac69e26-f176-43dc-b695-668fd9800c4b.eastasia.azurecontainer.io/score'
+    api_key='vtGt7uknpxFHb8P40n1AimaYMFvP2wdy'
+    headers = {
+        "Content-Type":"application/json",
+        "Accept":"application/json",
+        "Authorization":"Bearer " +api_key
+    }
+
+    req = urllib.request.Request(url,data,headers)
+
+    htmlstr="<html><body>"
+
+    try:
+        response = urllib.request.urlopen(req)
+        result = json.loads(response.read())
+        htmlstr=htmlstr+"根據您輸入參數資料，經過決策模型比對，診斷糖尿病的結果為"
+
+        if str(result['Results']['WebServiceOutput0'][0]['Scored Labels']) =='1.0':
+            htmlstr+= ' 陽性</body></html>'
+        else:
+            htmlstr+= ' 隱形</body></html>'
+
+    except urllib.error.HTTPError as error:
+        print("The request failed with status code:" + str(error.code))
+        htmlstr+= '</body></html>'
+
+    return htmlstr
+
 
 @app.route('/about')
 def about(): 
@@ -11,4 +65,3 @@ def about():
 
 if __name__"__name__" :
     app.run()
-    
