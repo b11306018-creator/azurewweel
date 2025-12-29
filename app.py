@@ -4,7 +4,7 @@ import json
 
 app = Flask(__name__)
 @app.route('/')
-def home() :
+def home():
     return render_template('form.html')
 
 @app.route('/aml', methods=['GET','POST'])
@@ -38,7 +38,7 @@ def aml():
         "Authorization":"Bearer " +api_key
     }
 
-    req = urllib.request.Request(url,data,headers)
+    req = urllib.request.Request(url,body,headers)
 
     htmlstr="<html><body>"
 
@@ -58,10 +58,9 @@ def aml():
 
     return htmlstr
 
-
 @app.route('/about')
 def about(): 
     return 'About'
 
-if __name__"__name__" :
+if __name__"__name__":
     app.run()
